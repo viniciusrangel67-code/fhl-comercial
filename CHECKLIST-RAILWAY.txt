@@ -1,0 +1,19 @@
+CHECKLIST RAILWAY — FHL COMERCIAL
+
+[ ] Criei conta no GitHub
+[ ] Criei repositório fhl-comercial
+[ ] Subi os arquivos do ZIP para o GitHub
+[ ] Criei conta no Railway
+[ ] Criei New Project > Deploy from GitHub Repo
+[ ] Selecionei o repositório fhl-comercial
+[ ] Adicionei PostgreSQL no projeto Railway
+[ ] Configurei DATABASE_URL
+[ ] Configurei JWT_SECRET
+[ ] Configurei APP_ORIGIN
+[ ] Deploy finalizou sem erro
+[ ] Abri o link público
+[ ] Testei site público
+[ ] Testei login/área restrita
+[ ] Testei cadastro de cliente
+[ ] Testei documentos automáticos
+[ ] Testei financeiro

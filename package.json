@@ -1,7 +1,7 @@
 {
   "name": "fhl-comercial",
-  "version": "2.3.0",
-  "description": "FHL Comercial 2.3 — auditoria minuciosa final da arquitetura, abas, APIs e funcionalidades",
+  "version": "2.5.0",
+  "description": "FHL Comercial 2.5 — pacote Railway corrigido contra deploy incompleto/MODULE_NOT_FOUND",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
@@ -13,7 +13,9 @@
     "migrate": "psql \"$DATABASE_URL\" -f sql/schema.sql && psql \"$DATABASE_URL\" -f sql/migration-1.3-commercial.sql && psql \"$DATABASE_URL\" -f sql/migration-1.5-calculators.sql && psql \"$DATABASE_URL\" -f sql/migration-1.7-saas-autonomo.sql && psql \"$DATABASE_URL\" -f sql/migration-1.9-operational-restore.sql && psql \"$DATABASE_URL\" -f sql/migration-2.0-consolidation.sql && psql \"$DATABASE_URL\" -f sql/migration-2.2-final-documents.sql",
     "deploy:checklist": "node scripts/deploy-checklist.js",
     "verify": "npm run check && npm test",
-    "seed": "node scripts/seed-demo-office.js"
+    "seed": "node scripts/seed-demo-office.js",
+    "railway:deploy": "npm run migrate && npm run seed && npm start",
+    "railway:verify": "npm run verify"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
