@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fhl
+      POSTGRES_USER: fhl
+      POSTGRES_PASSWORD: fhl_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - fhl_pgdata:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      APP_ORIGIN: http://localhost:3000
+      DATABASE_URL: postgresql://fhl:fhl_dev_password@db:5432/fhl
+      JWT_SECRET: troque-esta-chave-em-producao-com-mais-de-32-caracteres
+      AUTH_COOKIE_SECURE: "false"
+      GOOGLE_WORKSPACE_DOMAIN: seudominio.com.br
+      GOOGLE_ALLOWED_DOMAIN: seudominio.com.br
+      GOOGLE_REQUIRE_HOSTED_DOMAIN: "true"
+      GOOGLE_OAUTH_REDIRECT_URI: http://localhost:3000/api/auth/google/callback
+    ports:
+      - "3000:3000"
+
+volumes:
+  fhl_pgdata:
