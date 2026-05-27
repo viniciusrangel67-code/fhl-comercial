@@ -1,0 +1,13 @@
+const express = require("express");
+const { z } = require("zod");
+const { query } = require("../db");
+const { authRequired } = require("../middleware/auth");
+const { tenantRequired } = require("../middleware/tenant");
+const { auditLog } = require("../services/audit");
+const router=express.Router();
+router.use(authRequired,tenantRequired);
+const schema=z.object({type:z.string(),description:z.string().min(2),amount:z.number(),dueDate:z.string().optional().nullable(),due_date:z.string().optional().nullable(),status:z.string().optional().nullable()});
+router.get("/",async(req,res)=>{const r=await query("select * from finance_entries where office_id=$1 and deleted_at is null order by due_date nulls last, created_at desc limit 500",[req.officeId]);res.json({data:r.rows});});
+router.post("/",async(req,res)=>{const b=schema.parse(req.body);const r=await query("insert into finance_entries (office_id,type,description,amount,due_date,status) values ($1,$2,$3,$4,$5,$6) returning *",[req.officeId,b.type,b.description,b.amount,b.dueDate||b.due_date||null,b.status||"aberto"]);await auditLog({userId:req.user.id,officeId:req.officeId,module:"Financeiro",action:"Criar lançamento",entityType:"finance_entry",entityId:r.rows[0].id,ip:req.ip});res.status(201).json({data:r.rows[0]});});
+router.patch("/:id/status",async(req,res)=>{const b=z.object({status:z.string().default("pago"),paidAt:z.string().optional().nullable(),paid_at:z.string().optional().nullable()}).parse(req.body);const r=await query("update finance_entries set status=$3, paid_at=coalesce($4, now()), updated_at=now() where id=$1 and office_id=$2 and deleted_at is null returning *",[req.params.id,req.officeId,b.status,b.paidAt||b.paid_at||null]);if(!r.rows[0]) return res.status(404).json({error:true,message:"Lançamento financeiro não encontrado."});await auditLog({userId:req.user.id,officeId:req.officeId,module:"Financeiro",action:"Baixar lançamento",entityType:"finance_entry",entityId:req.params.id,detail:JSON.stringify({status:b.status}),ip:req.ip});res.json({data:r.rows[0]});});
+module.exports=router;

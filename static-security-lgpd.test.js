@@ -1,0 +1,20 @@
+const fs = require("fs");
+const path = require("path");
+const root = path.join(__dirname, "..");
+function assert(condition, message) { if (!condition) { console.error("FALHA:", message); process.exitCode = 1; } else console.log("OK:", message); }
+const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+assert(Boolean(pkg.dependencies.helmet), "helmet configurado");
+assert(Boolean(pkg.dependencies["express-rate-limit"]), "rate limit configurado");
+assert(Boolean(pkg.dependencies["node-cron"]), "node-cron previsto");
+const security = fs.readFileSync(path.join(root, "src/middleware/security.js"), "utf8");
+assert(security.includes("helmet"), "middleware helmet");
+assert(security.includes("rateLimit"), "middleware rateLimit");
+const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
+assert(server.includes("applySecurity(app)"), "segurança aplicada no server");
+const rbac = fs.readFileSync(path.join(root, "src/middleware/rbac.js"), "utf8");
+["platform_admin","admin","socio","advogado","financeiro","atendimento","visitante","requirePermission"].forEach(t => assert(rbac.includes(t), `RBAC ${t}`));
+const schema = fs.readFileSync(path.join(root, "sql/schema.sql"), "utf8");
+["policy_acceptances","lgpd_records","audit_logs","office_id","consent_evidence_url"].forEach(t => assert(schema.includes(t), `LGPD/schema ${t}`));
+const migration = fs.readFileSync(path.join(root, "sql/migration-1.3-commercial.sql"), "utf8");
+assert(migration.includes("Política de Privacidade"), "policy seed privacidade");
+assert(migration.includes("Termos de Uso"), "policy seed termos");

@@ -1,0 +1,21 @@
+const fs = require("fs");
+const path = require("path");
+const root = path.join(__dirname, "..");
+function assert(condition, message) { if (!condition) { console.error("FALHA:", message); process.exitCode = 1; } else console.log("OK:", message); }
+const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const app = fs.readFileSync(path.join(root, "public", "app-comercial.html"), "utf8");
+const api = fs.readFileSync(path.join(root, "public", "api-client.js"), "utf8");
+const service = fs.readFileSync(path.join(root, "src/services/documentAutomationService.js"), "utf8");
+const workspace = fs.readFileSync(path.join(root, "src/routes/workspace.js"), "utf8");
+const clients = fs.readFileSync(path.join(root, "src/routes/clients.js"), "utf8");
+const migration = fs.readFileSync(path.join(root, "sql", "migration-2.2-final-documents.sql"), "utf8");
+assert(pkg.version === "2.5.0", "versão 2.5.0");
+["clientDocAreaJuridica","clientDocProcesso","clientDocObjeto","clientDocModalidade","clientDocHonorarios","clientDocEntrada","clientDocParcelas","clientDocVencimento","clientDocGarantias","docautoAreaJuridica","docautoProcesso","docautoObjeto","docautoModalidade","docautoHonorarios","docautoEntrada","docautoParcelas","docautoVencimento","docautoGarantias"].forEach(t=>assert(app.includes(t), `campo avançado ${t}`));
+["todos","objeto_contrato","modalidade_contratacao","garantias_contrato","valor_honorarios","valor_entrada","numero_parcelas","primeiro_vencimento","processo_numero","area_juridica"].forEach(t=>assert(app.includes(t), `UI usa ${t}`));
+["OBJETO DO CONTRATO","MODALIDADE DE CONTRATAÇÃO","GARANTIAS DO CONTRATO","PARCELAMENTO","PRIMEIRO VENCIMENTO","ÁREA JURÍDICA","PROCESSO/REFERÊNCIA"].forEach(t=>assert(service.includes(t), `minuta contém ${t}`));
+assert(workspace.includes('z.enum(["todos","procuracao","contrato_honorarios","hipossuficiencia","faa"])'), "workspace aceita todos");
+assert(workspace.includes('["procuracao","contrato_honorarios","hipossuficiencia","faa"]'), "workspace gera todos");
+assert(api.includes('b.templateCode === "todos"'), "demo API suporta todos");
+assert(clients.includes("generateDefaultClientDocuments") && clients.includes("documentData"), "cliente preserva geração automática");
+["document_group_id","financial_terms","legal_context","preview_summary"].forEach(t=>assert(migration.includes(t), `migration ${t}`));
+["noticesView","chatView","publicationsView","agendaView","calendarView","leadsView","calculatorsView","saasView","docautoView"].forEach(t=>assert(app.includes(t), `módulo preservado ${t}`));

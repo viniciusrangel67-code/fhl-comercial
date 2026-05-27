@@ -1,0 +1,21 @@
+PASTAS FALTANTES — FHL COMERCIAL / RAILWAY
+
+Envie para o GitHub estas pastas:
+
+src
+public
+sql
+templates
+tests
+docs
+
+Atenção:
+1. Extraia este ZIP.
+2. Não envie este ZIP fechado para o GitHub.
+3. Abra a pasta extraída.
+4. Arraste as pastas para a tela do GitHub em "Adicionar arquivo" > "Upload files".
+5. Depois clique em "Commit changes".
+6. Confirme se no GitHub aparece: src/middleware/security.js
+7. Volte ao Railway e clique em Redeploy.
+
+O erro "Cannot find module './src/middleware/security'" ocorre porque a pasta src não foi enviada corretamente.

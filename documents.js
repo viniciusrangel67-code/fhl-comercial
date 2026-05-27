@@ -1,0 +1,12 @@
+const express = require("express");
+const { z } = require("zod");
+const { query } = require("../db");
+const { authRequired } = require("../middleware/auth");
+const { tenantRequired } = require("../middleware/tenant");
+const { auditLog } = require("../services/audit");
+const router=express.Router();
+router.use(authRequired,tenantRequired);
+const schema=z.object({clientId:z.string().optional(),client_id:z.string().optional(),processId:z.string().optional().nullable(),process_id:z.string().optional().nullable(),category:z.string().min(2),name:z.string().min(2),url:z.string().optional().nullable(),status:z.string().optional().nullable(),notes:z.string().optional().nullable()});
+router.get("/",async(req,res)=>{const r=await query("select * from documents where office_id=$1 and deleted_at is null order by created_at desc limit 500",[req.officeId]);res.json({data:r.rows});});
+router.post("/",async(req,res)=>{const b=schema.parse(req.body);const r=await query("insert into documents (office_id,client_id,process_id,category,name,url,status,notes,created_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *",[req.officeId,b.clientId||b.client_id,b.processId||b.process_id||null,b.category,b.name,b.url||null,b.status||"recebido",b.notes||null,req.user.id]);await auditLog({userId:req.user.id,officeId:req.officeId,module:"Documentos",action:"Criar documento",entityType:"document",entityId:r.rows[0].id,ip:req.ip});res.status(201).json({data:r.rows[0]});});
+module.exports=router;

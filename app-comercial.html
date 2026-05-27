@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fonseca Hespanha Lisboa — FHL Comercial 1.4 — Painel Comercial</title>
+  <script src="/api-client.js"></script>
+  <style>
+    :root{--bg:#f3efe7;--card:#fff;--ink:#1f2a24;--muted:#637069;--gold:#9a742e;--line:rgba(31,42,36,.14);--dark:#17211c;--danger:#8b1e1e;--ok:#1f6b45;--warn:#aa6b00}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .layout{display:grid;grid-template-columns:290px 1fr;min-height:100vh}.side{background:var(--dark);color:#fff;padding:24px;position:sticky;top:0;height:100vh;overflow:auto}.brand{font-family:Georgia,serif;font-size:1.5rem;font-weight:800}.side small{color:#cab88d}.nav{display:grid;gap:8px;margin-top:24px}.nav button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;text-align:left;padding:12px;border-radius:14px;font-weight:800;cursor:pointer}.nav button.active,.nav button:hover{background:#9a742e}.nav .group{margin-top:12px;color:#cab88d;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.main{padding:28px;overflow:auto}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:22px}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 14px 40px rgba(31,42,36,.06);margin-bottom:18px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.kpi{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}.kpi strong{font-size:1.8rem;display:block}.kpi span{color:var(--muted);font-weight:700}.view{display:none}.view.active{display:block}input,select,textarea{width:100%;padding:12px 13px;border-radius:12px;border:1px solid var(--line);font:inherit;background:#fff}textarea{min-height:88px}label{font-size:.78rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.btn{border:0;background:var(--dark);color:#fff;border-radius:999px;padding:10px 14px;font-weight:900;cursor:pointer}.btn.gold{background:var(--gold)}.btn.light{background:#e8dcc8;color:var(--ink)}.btn.danger{background:var(--danger)}.btn.ok{background:var(--ok)}.btn.small{font-size:.82rem;padding:7px 10px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:.75rem;text-transform:uppercase;color:var(--muted)}.table-wrap{overflow:auto}.status{display:inline-block;padding:5px 9px;border-radius:999px;background:#efe6d3;font-weight:800}.status.ok{background:#dceee5;color:#135b38}.status.warn{background:#fff0ce;color:#704600}.status.danger{background:#f5dddd;color:#7c1717}.alert{padding:12px;border-radius:16px;background:#fff8ea;border-left:5px solid var(--gold);margin-bottom:14px}.alert.danger{background:#fff0f0;border-color:var(--danger)}.actions{display:flex;gap:8px;flex-wrap:wrap}.muted{color:var(--muted)}.hide{display:none!important}.modal-backdrop{position:fixed;inset:0;background:rgba(23,33,28,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:20}.modal{background:#fff;border-radius:24px;max-width:840px;width:100%;max-height:92vh;overflow:auto;padding:24px;border:1px solid var(--line)}.modal-backdrop.open{display:flex}.pill{font-size:.78rem;border-radius:999px;padding:4px 8px;background:#eee4d2;font-weight:900}.prod-banner{background:#241a0a;border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:16px;padding:12px;margin-top:16px}
+    @media(max-width:1000px){.layout{grid-template-columns:1fr}.side{height:auto;position:relative}.grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.top{display:block}}@media(max-width:620px){.grid,.grid-2{grid-template-columns:1fr}.main{padding:16px}}
+  
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.calendar-day{min-height:92px;border:1px solid rgba(31,42,36,.14);border-radius:14px;padding:8px;background:#fff}
+.calendar-day strong{display:block;margin-bottom:6px}
+.calendar-event{font-size:.75rem;border-radius:8px;background:#f0e6d5;padding:4px;margin:3px 0}
+@media(max-width:800px){.calendar-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="side">
+      <div class="brand">FHL Comercial 1.4</div>
+      <small>Abas fechadas · APIs ativadas · travas produtivas</small>
+      <div class="prod-banner">
+        <label style="color:#cab88d"><input type="checkbox" id="demoToggle" style="width:auto"> Modo demonstração local</label>
+        <p id="modeWarning" style="margin:8px 0 0;font-size:.86rem">Produção/API real: exige login, banco e .env configurados.</p>
+      </div>
+      <nav class="nav" id="nav">
+        <div class="group">Operação</div>
+        <button data-view="dashboard" class="active">Dashboard Executivo</button>
+        <button data-view="notices">Avisos</button>
+        <button data-view="chat">Chat Interno</button>
+        <button data-view="clients">Clientes</button>
+        <button data-view="processes">Processos</button>
+        <button data-view="tasks">Tarefas</button>
+        <button data-view="publications">Publicações e Intimações</button>
+        <button data-view="agenda">Agenda e Prazos</button>
+        <button data-view="calendar">Calendário Visual</button>
+        <button data-view="leads">Contatos e Leads</button>
+        <button data-view="finance">Financeiro</button>
+        <button data-view="calculators">Calculadoras Jurídicas</button>
+        <button data-view="documents">Documentos</button>
+        <button data-view="docauto">Documentos Automáticos</button>
+        <div class="group">Governança</div>
+        <button data-view="governance">Governança/LGPD</button>
+        <div class="group">Plataforma</div>
+        <button data-view="admin">Administração</button>
+        <button data-view="billing">Cobrança SaaS</button>
+        <button data-view="saas">SaaS Autônomo</button>
+        <button data-view="support">Suporte</button>
+        <button data-view="system">Sistema/Backups</button>
+      </nav>
+    </aside>
+    <main class="main">
+      <div class="top">
+        <div>
+          <h1 id="viewTitle">Dashboard Executivo</h1>
+          <p id="sub">Painel comercial multiempresa, com validações mínimas de produção.</p>
+        </div>
+        <div class="actions">
+          <button class="btn light" onclick="loadAll()">Atualizar</button>
+          <button class="btn gold" onclick="window.location.href='/api/auth/google'">Login Google</button>
+        </div>
+      </div>
+      <div id="messages"></div>
+
+      
+      <section id="noticesView" class="view">
+        <div class="card">
+          <h2>Mural de Avisos, Recados e Notificações</h2>
+          <p class="muted">Módulo restaurado para comunicados internos, recados importantes, prioridades e avisos fixados na área inicial.</p>
+          <div class="form-grid">
+            <div><label>Título</label><input id="noticeTitle" value="Aviso importante"></div>
+            <div><label>Prioridade</label><select id="noticePriority"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option><option value="baixa">Baixa</option></select></div>
+            <div><label>Fixar aviso</label><select id="noticePinned"><option value="true">Sim</option><option value="false">Não</option></select></div>
+          </div>
+          <label>Mensagem</label><textarea id="noticeMessage">Recado interno para a equipe.</textarea>
+          <div class="actions"><button class="btn" onclick="createNotice()">Publicar aviso</button><button class="btn light" onclick="loadNotices()">Atualizar mural</button></div>
+        </div>
+        <div class="card"><h2>Avisos ativos</h2><div id="noticesList"></div></div>
+      </section>
+
+      <section id="chatView" class="view">
+        <div class="card">
+          <h2>Chat Interno e Mensagens</h2>
+          <p class="muted">Módulo restaurado para conversas internas, mensagens por cliente/processo, histórico e notificações de leitura.</p>
+          <div class="form-grid">
+            <div><label>Título da conversa</label><input id="chatTitle" value="Nova conversa interna"></div>
+            <div><label>Tipo</label><select id="chatType"><option value="internal">Interna</option><option value="client">Cliente</option><option value="process">Processo</option></select></div>
+            <div><label>Prioridade</label><select id="chatPriority"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option><option value="baixa">Baixa</option></select></div>
+          </div>
+          <label>Mensagem inicial</label><textarea id="chatInitialMessage">Mensagem inicial da conversa.</textarea>
+          <div class="actions"><button class="btn" onclick="createConversation()">Criar conversa</button><button class="btn light" onclick="loadConversations()">Atualizar chat</button></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h2>Conversas</h2><div class="table-wrap"><table id="conversationsTable"></table></div></div>
+          <div class="card"><h2>Mensagens</h2><div id="messagesBox"></div><label>Nova mensagem</label><textarea id="chatNewMessage">Responder conversa.</textarea><button class="btn" onclick="sendMessageToSelectedConversation()">Enviar mensagem</button></div>
+        </div>
+      </section>
+
+      <section id="calendarView" class="view">
+        <div class="card">
+          <h2>Calendário Visual</h2>
+          <p class="muted">Módulo restaurado para visualização mensal de prazos, audiências, reuniões e eventos da agenda.</p>
+          <div class="actions"><button class="btn" onclick="loadVisualCalendar()">Atualizar calendário</button><button class="btn light" onclick="showTodayCalendar()">Hoje</button></div>
+        </div>
+        <div class="card"><div id="calendarGrid" class="calendar-grid"></div></div>
+      </section>
+
+      <section id="docautoView" class="view">
+        <div class="card">
+          <h2>Documentos Automáticos</h2>
+          <p class="muted">Módulo restaurado para preencher formulário e gerar minutas baseadas nos modelos do escritório: Procuração, Contrato de Honorários, Declaração de Hipossuficiência e FAA.</p>
+          <div class="form-grid">
+            <div><label>Modelo</label><select id="docautoTemplate" onchange="renderDocumentAutomationForm()"><option value="todos">Todos os documentos</option><option value="procuracao">Procuração</option><option value="contrato_honorarios">Contrato de Honorários</option><option value="hipossuficiencia">Declaração de Hipossuficiência</option><option value="faa">FAA - Ficha de Atendimento</option></select></div>
+            <div><label>Cliente/Nome</label><input id="docautoClienteNome" value="Cliente Demonstração"></div>
+            <div><label>CPF/CNPJ</label><input id="docautoCpf" value="000.000.000-00"></div>
+            <div><label>Telefone</label><input id="docautoTelefone" value="(41) 99999-0000"></div>
+            <div><label>E-mail</label><input id="docautoEmail" value="cliente@email.com"></div>
+            <div><label>Foro</label><input id="docautoForo" value="Paranaguá/PR"></div>
+          </div>
+          <div class="form-grid">
+            <div><label>Área jurídica</label><input id="docautoAreaJuridica" value="Trabalhista"></div>
+            <div><label>Processo/referência</label><input id="docautoProcesso" placeholder="nº do processo, se houver"></div>
+            <div style="grid-column:1/-1"><label>Objeto do contrato</label><input id="docautoObjeto" value="Prestação de serviços advocatícios"></div>
+            <div><label>Modalidade de contratação</label><select id="docautoModalidade"><option value="por processo">Por processo</option><option value="consultivo">Consultivo</option><option value="mensalista">Mensalista</option><option value="êxito">Êxito</option><option value="ato isolado">Ato isolado</option></select></div>
+            <div><label>Honorários</label><input id="docautoHonorarios" value="R$ 0,00"></div>
+            <div><label>Entrada</label><input id="docautoEntrada" value="R$ 0,00"></div>
+            <div><label>Parcelas</label><input id="docautoParcelas" type="number" value="1"></div>
+            <div><label>Primeiro vencimento</label><input id="docautoVencimento" type="date"></div>
+            <div style="grid-column:1/-1"><label>Garantias do contrato</label><textarea id="docautoGarantias">Sem garantia adicional expressa, salvo ajuste escrito entre as partes.</textarea></div>
+          </div>
+          <div id="docautoDynamicFields"></div>
+          <div class="actions"><button class="btn" onclick="generateAutomaticDocument()">Gerar documento</button><button class="btn light" onclick="loadGeneratedDocuments()">Histórico</button><button class="btn light" onclick="downloadGeneratedDocument()">Baixar minuta</button></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h2>Prévia da minuta</h2><pre id="docautoPreview" style="white-space:pre-wrap"></pre></div>
+          <div class="card"><h2>Documentos gerados</h2><div class="table-wrap"><table id="generatedDocsTable"></table></div></div>
+        </div>
+      </section>
+
+<section id="dashboardView" class="view active">
+        <div class="grid">
+          <div class="kpi"><strong id="kClients">0</strong><span>Clientes</span></div>
+          <div class="kpi"><strong id="kProcesses">0</strong><span>Processos</span></div>
+          <div class="kpi"><strong id="kTasks">0</strong><span>Tarefas pendentes</span></div>
+          <div class="kpi"><strong id="kReceivable">R$ 0,00</strong><span>A receber</span></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Alertas produtivos</h2>
+            <div id="productiveAlerts"></div>
+          </div>
+          <div class="card">
+            <h2>Homologação funcional</h2>
+            <p>O teste rápido roda em modo demonstração para validar fluxo visual e ações principais sem servidor externo.</p>
+            <div class="actions">
+              <button class="btn" onclick="runSmokeTest()">Rodar teste rápido</button>
+              <button class="btn light" onclick="downloadState()">Exportar estado demo</button>
+            </div>
+            <pre id="smokeResult"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="clientsView" class="view">
+        <div class="card"><h2>Cliente</h2><input type="hidden" id="clientId">
+          <div class="form-grid">
+            <div><label>Nome</label><input id="clientName"></div><div><label>CPF/CNPJ</label><input id="clientDocument"></div><div><label>E-mail</label><input id="clientEmail"></div><div><label>Telefone</label><input id="clientPhone"></div><div style="grid-column:1/-1"><label>Endereço</label><input id="clientAddress"></div><div><label>Gerar documentos automáticos</label><select id="clientAutoDocs"><option value="true">Sim — Procuração, contrato, hipossuficiência e FAA</option><option value="false">Não</option></select></div><div><label>Foro dos modelos</label><input id="clientDocForo" value="Paranaguá/PR"></div>
+            <div><label>Área jurídica</label><input id="clientDocAreaJuridica" value="Trabalhista"></div>
+            <div><label>Processo/referência</label><input id="clientDocProcesso" placeholder="nº do processo, se houver"></div>
+            <div style="grid-column:1/-1"><label>Objeto do contrato</label><input id="clientDocObjeto" value="Prestação de serviços advocatícios"></div>
+            <div><label>Modalidade de contratação</label><select id="clientDocModalidade"><option value="por processo">Por processo</option><option value="consultivo">Consultivo</option><option value="mensalista">Mensalista</option><option value="êxito">Êxito</option><option value="ato isolado">Ato isolado</option></select></div>
+            <div><label>Honorários</label><input id="clientDocHonorarios" value="R$ 0,00"></div>
+            <div><label>Entrada</label><input id="clientDocEntrada" value="R$ 0,00"></div>
+            <div><label>Parcelas</label><input id="clientDocParcelas" type="number" value="1"></div>
+            <div><label>Primeiro vencimento</label><input id="clientDocVencimento" type="date"></div>
+            <div style="grid-column:1/-1"><label>Garantias do contrato</label><textarea id="clientDocGarantias">Sem garantia adicional expressa, salvo ajuste escrito entre as partes.</textarea></div>
+          </div><br><div class="actions"><button class="btn" onclick="saveClient()">Salvar cliente</button><button class="btn light" onclick="clearClientForm()">Limpar</button></div>
+        </div>
+        <div class="card"><h2>Clientes</h2><div class="table-wrap"><table id="clientsTable"></table></div></div>
+      </section>
+
+      <section id="processesView" class="view">
+        <div class="card"><h2>Processo</h2><input type="hidden" id="processId">
+          <div class="form-grid">
+            <div><label>Cliente</label><select id="processClientId"></select></div><div><label>Número</label><input id="processNumber"></div><div><label>Área</label><input id="processArea"></div><div><label>Fase</label><input id="processPhase"></div><div><label>Risco</label><select id="processRisk"><option>baixo</option><option>medio</option><option>alto</option></select></div><div><label>Prazo interno</label><input type="date" id="processDeadline"></div><div style="grid-column:1/-1"><label>Estratégia/observações</label><textarea id="processStrategy"></textarea></div>
+          </div><br><button class="btn" onclick="saveProcess()">Salvar processo</button>
+        </div>
+        <div class="card"><h2>Processos</h2><div class="table-wrap"><table id="processesTable"></table></div></div>
+      </section>
+
+      <section id="tasksView" class="view">
+        <div class="card"><h2>Tarefa</h2>
+          <div class="form-grid"><div><label>Título</label><input id="taskTitle"></div><div><label>Prioridade</label><select id="taskPriority"><option>normal</option><option>alta</option><option>urgente</option></select></div><div><label>Status</label><select id="taskStatus"><option>pendente</option><option>em_andamento</option><option>concluida</option></select></div><div><label>Prazo</label><input type="date" id="taskDue"></div><div style="grid-column:1/-1"><label>Descrição</label><textarea id="taskDescription"></textarea></div></div><br><button class="btn" onclick="saveTask()">Salvar tarefa</button>
+        </div>
+        <div class="card"><h2>Tarefas</h2><div class="table-wrap"><table id="tasksTable"></table></div></div>
+      </section>
+
+
+      <section id="publicationsView" class="view">
+        <div class="card">
+          <h2>Publicações e Intimações</h2>
+          <p class="muted">Módulo restaurado para captura/importação, cadastro manual, vínculo com cliente/processo e geração de tarefa/prazo.</p>
+          <div class="form-grid">
+            <div><label>Título</label><input id="pubTitle" value="Intimação para manifestação"></div>
+            <div><label>Origem</label><select id="pubSource"><option value="manual">Manual</option><option value="api">API preparada</option><option value="importacao">Importação</option></select></div>
+            <div><label>Tribunal</label><input id="pubCourt" value="TJPR"></div>
+            <div><label>Data publicação</label><input id="pubPublicationDate" type="date"></div>
+            <div><label>Prazo final</label><input id="pubDeadlineDate" type="date"></div>
+            <div><label>Tipo de prazo</label><input id="pubDeadlineType" value="Manifestação"></div>
+          </div>
+          <label>Texto/observações</label><textarea id="pubRawText">Texto da intimação/publicação.</textarea>
+          <div class="actions">
+            <button class="btn" onclick="createPublication()">Cadastrar intimação</button>
+            <button class="btn light" onclick="loadPublications()">Atualizar lista</button>
+          </div>
+        </div>
+        <div class="card"><h2>Lista de publicações/intimações</h2><div class="table-wrap"><table id="publicationsTable"></table></div></div>
+      </section>
+
+      <section id="agendaView" class="view">
+        <div class="card">
+          <h2>Agenda e Prazos</h2>
+          <p class="muted">Módulo restaurado para audiências, prazos, reuniões, eventos vinculados a processos e futuras integrações com Google Calendar.</p>
+          <div class="form-grid">
+            <div><label>Título</label><input id="agendaTitle" value="Prazo final — manifestação"></div>
+            <div><label>Tipo</label><select id="agendaType"><option value="prazo">Prazo</option><option value="audiencia">Audiência</option><option value="reuniao">Reunião</option><option value="tarefa">Tarefa</option></select></div>
+            <div><label>Início</label><input id="agendaStart" type="datetime-local"></div>
+            <div><label>Fim</label><input id="agendaEnd" type="datetime-local"></div>
+            <div><label>Local</label><input id="agendaLocation" value="Fórum / online"></div>
+          </div>
+          <label>Descrição</label><textarea id="agendaDescription">Evento operacional vinculado ao processo.</textarea>
+          <div class="actions">
+            <button class="btn" onclick="createAgendaEvent()">Cadastrar evento</button>
+            <button class="btn light" onclick="loadAgenda()">Atualizar agenda</button>
+          </div>
+        </div>
+        <div class="card"><h2>Agenda</h2><div class="table-wrap"><table id="agendaTable"></table></div></div>
+      </section>
+
+      <section id="leadsView" class="view">
+        <div class="card">
+          <h2>Contatos e Leads</h2>
+          <p class="muted">Módulo restaurado para receber contatos do site, WhatsApp, formulário institucional e converter em cliente.</p>
+          <div class="form-grid">
+            <div><label>Nome</label><input id="leadName" value="Novo contato"></div>
+            <div><label>E-mail</label><input id="leadEmail" value="contato@email.com"></div>
+            <div><label>Telefone</label><input id="leadPhone" value="(41) 99999-0000"></div>
+            <div><label>Origem</label><select id="leadSource"><option value="site">Site</option><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option><option value="indicacao">Indicação</option></select></div>
+            <div><label>Área</label><input id="leadPracticeArea" value="Trabalhista"></div>
+            <div><label>LGPD</label><select id="leadConsent"><option value="true">Consentimento registrado</option><option value="false">Pendente</option></select></div>
+          </div>
+          <label>Mensagem</label><textarea id="leadMessage">Mensagem recebida pelo canal de contato.</textarea>
+          <div class="actions">
+            <button class="btn" onclick="createLead()">Cadastrar lead</button>
+            <button class="btn light" onclick="loadLeads()">Atualizar contatos</button>
+          </div>
+        </div>
+        <div class="card"><h2>Leads recebidos</h2><div class="table-wrap"><table id="leadsTable"></table></div></div>
+      </section>
+
+      <section id="financeView" class="view">
+        <div class="card"><h2>Lançamento financeiro</h2>
+          <div class="form-grid"><div><label>Tipo</label><select id="financeType"><option value="receita">Receita</option><option value="despesa">Despesa</option></select></div><div><label>Descrição</label><input id="financeDescription"></div><div><label>Valor</label><input type="number" id="financeAmount"></div><div><label>Status</label><select id="financeStatus"><option value="aberto">Aberto</option><option value="pago">Pago</option></select></div><div><label>Vencimento</label><input type="date" id="financeDue"></div></div><br><button class="btn" onclick="saveFinance()">Salvar lançamento</button>
+        </div>
+        <div class="card"><h2>Financeiro</h2><div class="grid"><div class="kpi"><strong id="finReceive">R$ 0,00</strong><span>A receber</span></div><div class="kpi"><strong id="finPaid">R$ 0,00</strong><span>Recebido</span></div><div class="kpi"><strong id="finDebt">R$ 0,00</strong><span>Em aberto</span></div><div class="kpi"><strong id="finExpenses">R$ 0,00</strong><span>Despesas</span></div></div><br><div class="table-wrap"><table id="financeTable"></table></div></div>
+      </section>
+
+
+      <section id="calculatorsView" class="view">
+        <div class="card">
+          <h2>Central de Calculadoras Jurídicas</h2>
+          <p class="muted">Cálculos auxiliares com memória, rastreabilidade e alerta de conferência jurídica. Em produção, os indexadores devem ser sincronizados com fontes oficiais e versionados.</p>
+          <div class="form-grid">
+            <div><label>Calculadora</label><select id="calcType" onchange="renderCalculatorForm()">
+              <option value="atualizacao">Atualização de valores</option>
+              <option value="juros">Juros e correção monetária</option>
+              <option value="pensao">Pensão alimentícia</option>
+              <option value="horas">Horas extras</option>
+              <option value="rescisao">Verbas rescisórias</option>
+              <option value="parcelas">Parcelas vencidas</option>
+              <option value="debito">Atualização de débito judicial</option>
+            </select></div>
+            <div><label>Cliente</label><select id="calcClientId"></select></div>
+            <div><label>Processo</label><select id="calcProcessId"></select></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h2>Parâmetros</h2><div id="calculatorForm"></div><br><div class="actions"><button class="btn" onclick="runSelectedCalculator()">Calcular</button><button class="btn light" onclick="syncIndexers()">Sincronizar indexadores</button></div></div>
+          <div class="card"><h2>Resultado</h2><div id="calculatorResult"></div><div class="actions"><button class="btn light" onclick="printCalculationMemory()">Imprimir memória</button><button class="btn light" onclick="downloadCalculationMemory()">Baixar JSON</button></div></div>
+        </div>
+        <div class="card"><h2>Indexadores disponíveis</h2><div class="table-wrap"><table id="indexersTable"></table></div></div>
+      </section>
+
+      <section id="documentsView" class="view">
+        <div class="card"><h2>Documento</h2>
+          <div class="form-grid"><div><label>Cliente</label><select id="docClientId"></select></div><div><label>Processo</label><select id="docProcessId"></select></div><div><label>Categoria</label><input id="docCategory"></div><div><label>Nome</label><input id="docName"></div><div><label>Status</label><select id="docStatus"><option>pendente</option><option>recebido</option><option>conferido</option><option>faltante</option></select></div><div><label>URL/Drive</label><input id="docUrl"></div></div><br><button class="btn" onclick="saveDocument()">Salvar documento</button>
+          <p class="muted">Upload real ao Google Drive depende do backend/OAuth em produção. Esta tela vincula URL/link e prepara a estrutura documental.</p>
+        </div>
+        <div class="card"><h2>Documentos</h2><div class="table-wrap"><table id="documentsTable"></table></div></div>
+      </section>
+
+      <section id="governanceView" class="view">
+        <div class="grid-2">
+          <div class="card"><h2>Registro LGPD</h2>
+            <div class="form-grid"><div><label>Cliente</label><select id="lgpdClientId"></select></div><div><label>Base legal</label><input id="lgpdBasis"></div><div><label>Categoria</label><input id="lgpdCategory"></div><div><label>Retenção</label><input id="lgpdRetention"></div><div style="grid-column:1/-1"><label>Observações</label><textarea id="lgpdNotes"></textarea></div></div><br><button class="btn" onclick="saveLgpd()">Salvar registro</button>
+          </div>
+          <div class="card"><h2>Termos e Política</h2><div id="policiesBox"></div></div>
+        </div>
+        <div class="card"><h2>Registros LGPD</h2><div class="table-wrap"><table id="lgpdTable"></table></div></div>
+      </section>
+
+      <section id="adminView" class="view">
+        <div class="grid"><div class="kpi"><strong id="admOffices">0</strong><span>Escritórios</span></div><div class="kpi"><strong id="admUsers">0</strong><span>Usuários</span></div><div class="kpi"><strong id="admClients">0</strong><span>Clientes</span></div><div class="kpi"><strong id="admTickets">0</strong><span>Chamados abertos</span></div></div>
+        <div class="card"><h2>Novo escritório</h2><div class="form-grid"><div><label>Nome</label><input id="officeName"></div><div><label>Slug</label><input id="officeSlug"></div><div><label>E-mail</label><input id="officeEmail"></div></div><br><button class="btn" onclick="saveOffice()">Criar escritório</button></div>
+        <div class="card"><h2>Escritórios</h2><div class="table-wrap"><table id="officesTable"></table></div></div>
+      </section>
+
+      <section id="billingView" class="view">
+        <div class="card"><h2>Assinatura</h2><div id="subscriptionBox"></div></div>
+        <div class="card"><h2>Planos</h2><div class="table-wrap"><table id="plansTable"></table></div></div>
+        <div class="card"><h2>Fatura manual</h2><div class="form-grid"><div><label>Valor</label><input type="number" id="invoiceAmount"></div><div><label>Vencimento</label><input type="date" id="invoiceDue"></div><div><label>Descrição</label><input id="invoiceDescription"></div></div><br><button class="btn" onclick="createManualInvoice()">Gerar fatura</button></div>
+      </section>
+
+
+      <section id="saasView" class="view">
+        <div class="card">
+          <h2>SaaS Autônomo</h2>
+          <p class="muted">Central de preparação para venda autônoma: onboarding, planos, limites, uso, bloqueios, assinatura, webhooks e prontidão de produção.</p>
+          <div class="actions">
+            <button class="btn" onclick="loadSaasDashboard()">Atualizar painel SaaS</button>
+            <button class="btn light" onclick="simulateOnboarding()">Simular onboarding</button>
+            <button class="btn light" onclick="simulatePastDue()">Simular inadimplência</button>
+            <button class="btn light" onclick="simulateUnlock()">Simular desbloqueio</button>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><h2>Status da conta</h2><div id="saasAccountBox"></div></div>
+          <div class="card"><h2>Uso e limites</h2><div id="saasUsageBox"></div></div>
+          <div class="card"><h2>Planos comerciais</h2><div id="saasPlansBox"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h2>Checklist de autonomia</h2><div id="saasAutonomyChecklist"></div></div>
+          <div class="card"><h2>Eventos/Webhooks</h2><div id="saasWebhookBox"></div></div>
+        </div>
+      </section>
+
+      <section id="supportView" class="view">
+        <div class="card"><h2>Novo chamado</h2><div class="form-grid"><div><label>Assunto</label><input id="ticketSubject"></div><div><label>Prioridade</label><select id="ticketPriority"><option>normal</option><option>alta</option><option>urgente</option></select></div><div style="grid-column:1/-1"><label>Mensagem</label><textarea id="ticketMessage"></textarea></div></div><br><button class="btn" onclick="saveTicket()">Abrir chamado</button></div>
+        <div class="card"><h2>Chamados</h2><div class="table-wrap"><table id="supportTable"></table></div></div>
+      </section>
+
+      <section id="systemView" class="view">
+        <div class="card"><h2>Sistema e backups</h2><div class="actions"><button class="btn" onclick="runBackup()">Executar backup agora</button><button class="btn light" onclick="preMigrationBackupLock()">Trava pré-migration</button></div><p class="muted">Restauração, storage externo e agendamento real dependem do ambiente de produção.</p></div>
+        <div class="card"><h2>Backups</h2><div class="table-wrap"><table id="backupsTable"></table></div></div>
+        <div class="card"><h2>Checklist de produção</h2><div id="productionChecklist"></div></div>
+        <div class="card"><h2>Arquitetura Profissional 1.6</h2><div id="architectureStatusBox"></div><br><button class="btn light" onclick="loadArchitectureStatus()">Verificar arquitetura</button></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop"><div class="modal"><div class="actions" style="justify-content:space-between"><h2 id="modalTitle">Detalhes</h2><button class="btn light" onclick="closeModal()">Fechar</button></div><div id="modalBody"></div></div></div>
+
+<script>
+const api = window.fhlApi;
+const $ = id => document.getElementById(id);
+let state = { clients:[], processes:[], tasks:[], finance:[], docs:[], lgpd:[], support:[], backups:[], plans:[], sub:null, offices:[], policies:[], metrics:null };
+const money = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const today = () => new Date().toISOString().slice(0,10);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const msg = (text, type="ok") => $("messages").innerHTML = `<div class="alert ${type==="danger"?"danger":""}">${text}</div>`;
+const unwrap = r => r?.data ?? r ?? [];
+const byId = (arr,id) => arr.find(x=>String(x.id)===String(id));
+const clientName = id => byId(state.clients,id)?.name || id || "-";
+const processNumber = id => byId(state.processes,id)?.number || id || "-";
+const statusClass = s => /pago|conclu|recebido|ativo|done|conferido/i.test(String(s)) ? "ok" : /alto|urgente|atras|faltante|suspended|open|aberto/i.test(String(s)) ? "danger" : "warn";
+const badge = s => `<span class="status ${statusClass(s)}">${esc(s||"-")}</span>`;
+
+function table(id, rows, cols) {
+  $(id).innerHTML = `<thead><tr>${cols.map(c=>`<th>${c.label}</th>`).join("")}</tr></thead><tbody>${(rows||[]).map(r=>`<tr>${cols.map(c=>`<td>${typeof c.value==="function"?c.value(r):esc(r[c.value])}</td>`).join("")}</tr>`).join("")}</tbody>`;
+}
+async function safe(fn, fallback=[]) { try { return unwrap(await fn()); } catch(e) { msg(`Erro: ${esc(e.message)}. Ative o modo demonstração ou configure backend/banco/login.`, "danger"); return fallback; } }
+function confirmAction(text){ return window.confirm(text); }
+
+document.querySelectorAll("#nav button").forEach(btn => btn.addEventListener("click", () => {
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  $(`${btn.dataset.view}View`).classList.add("active");
+  $("viewTitle").textContent = btn.textContent;
+}));
+$("demoToggle").checked = api.demoMode;
+$("demoToggle").addEventListener("change", e => { api.setDemoMode(e.target.checked); updateModeWarning(); loadAll(); });
+function updateModeWarning(){ $("modeWarning").innerHTML = api.demoMode ? "<strong>DEMO:</strong> dados ficam apenas neste navegador." : "<strong>PRODUÇÃO:</strong> exige API, login, banco e .env reais."; }
+
+function fillSelect(id, rows, labelFn, placeholder="Selecione") {
+  $(id).innerHTML = `<option value="">${placeholder}</option>` + rows.map(r=>`<option value="${esc(r.id)}">${esc(labelFn(r))}</option>`).join("");
+}
+function fillAllSelects(){
+  fillSelect("processClientId", state.clients, c=>c.name, "Selecione o cliente");
+  fillSelect("docClientId", state.clients, c=>c.name, "Selecione o cliente");
+  fillSelect("lgpdClientId", state.clients, c=>c.name, "Selecione o cliente");
+  fillSelect("docProcessId", state.processes, p=>p.number, "Sem processo específico");
+  fillSelect("calcClientId", state.clients, c=>c.name, "Cliente opcional");
+  fillSelect("calcProcessId", state.processes, p=>p.number, "Processo opcional");
+}
+async function loadAll() {
+  [state.clients, state.processes, state.tasks, state.finance, state.docs, state.lgpd, state.support, state.backups, state.plans, state.sub, state.offices, state.policies, state.metrics] = await Promise.all([
+    safe(()=>api.clients()), safe(()=>api.processes()), safe(()=>api.tasks()), safe(()=>api.finance()),
+    safe(()=>api.documents()), safe(()=>api.lgpd()), safe(()=>api.supportTickets()), safe(()=>api.backups()),
+    safe(()=>api.plans()), safe(()=>api.subscription(), null), safe(()=>api.adminOffices()), safe(()=>api.policies()), safe(()=>api.adminMetrics(), null)
+  ]);
+  fillAllSelects(); renderAll(); updateModeWarning();
+}
+function renderAll(){
+  const pendingTasks = state.tasks.filter(t=>!String(t.status||"").includes("conclu")).length;
+  const receivable = state.finance.filter(f=>f.type==="receita" && f.status!=="pago").reduce((s,f)=>s+Number(f.amount||0),0);
+  $("kClients").textContent=state.clients.length; $("kProcesses").textContent=state.processes.length; $("kTasks").textContent=pendingTasks; $("kReceivable").textContent=money(receivable);
+
+  const paid = state.finance.filter(f=>f.status==="pago").reduce((s,f)=>s+Number(f.amount||0),0);
+  const expenses = state.finance.filter(f=>f.type==="despesa").reduce((s,f)=>s+Number(f.amount||0),0);
+  $("finReceive").textContent=money(receivable); $("finPaid").textContent=money(paid); $("finDebt").textContent=money(receivable); $("finExpenses").textContent=money(expenses);
+
+  renderAlerts();
+  table("clientsTable", state.clients, [
+    {label:"Nome",value:r=>`<strong>${esc(r.name)}</strong><br><small>${esc(r.id)}</small>`},
+    {label:"Documento",value:"document"},{label:"Contato",value:r=>`${esc(r.email)}<br>${esc(r.phone)}`},
+    {label:"Ações",value:r=>`<div class="actions"><button class="btn small light" onclick="editClient('${esc(r.id)}')">Editar</button><button class="btn small danger" onclick="archiveClient('${esc(r.id)}')">Arquivar</button><button class="btn small" onclick="openClientFile('${esc(r.id)}')">Ficha</button></div>`}
+  ]);
+  table("processesTable", state.processes, [
+    {label:"Número",value:r=>`<strong>${esc(r.number)}</strong><br><small>${esc(r.id)}</small>`},{label:"Cliente",value:r=>esc(clientName(r.client_id || r.clientId))},{label:"Área/Fase",value:r=>`${esc(r.area)}<br>${esc(r.phase||"")}`},{label:"Risco",value:r=>badge(r.risk)},{label:"Prazo",value:r=>esc(r.internal_deadline||r.due_date||r.next_deadline||"-")},{label:"Ações",value:r=>`<button class="btn small light" onclick="openProcessFile('${esc(r.id)}')">Ficha</button>`}
+  ]);
+  table("tasksTable", state.tasks, [
+    {label:"Título",value:"title"},{label:"Prioridade",value:r=>badge(r.priority)},{label:"Status",value:r=>badge(r.status)},{label:"Prazo",value:"due_date"},{label:"Ações",value:r=>`<div class="actions"><button class="btn small ok" onclick="updateTaskStatus('${esc(r.id)}','concluida')">Concluir</button><button class="btn small light" onclick="updateTaskStatus('${esc(r.id)}','em_andamento')">Em andamento</button></div>`}
+  ]);
+  table("financeTable", state.finance, [
+    {label:"Tipo",value:"type"},{label:"Descrição",value:"description"},{label:"Valor",value:r=>money(r.amount)},{label:"Status",value:r=>badge(r.status)},{label:"Vencimento",value:"due_date"},{label:"Ações",value:r=>`<button class="btn small ok" onclick="markFinancePaid('${esc(r.id)}')">Baixar</button>`}
+  ]);
+  table("documentsTable", state.docs, [
+    {label:"Nome",value:"name"},{label:"Cliente",value:r=>esc(clientName(r.client_id||r.clientId))},{label:"Processo",value:r=>esc(processNumber(r.process_id||r.processId))},{label:"Categoria",value:"category"},{label:"Status",value:r=>badge(r.status)},{label:"Link",value:r=>r.url?`<a href="${esc(r.url)}" target="_blank">Abrir</a>`:"-" }
+  ]);
+  table("lgpdTable", state.lgpd, [
+    {label:"Cliente",value:r=>esc(clientName(r.client_id||r.clientId))},{label:"Base legal",value:r=>esc(r.legal_basis||r.legalBasis)},{label:"Categoria",value:r=>esc(r.data_category||r.dataCategory)},{label:"Retenção",value:"retention"},{label:"Ações",value:r=>`<button class="btn small light" onclick="exportLgpdRecord('${esc(r.id)}')">Exportar</button>`}
+  ]);
+  $("policiesBox").innerHTML = state.policies.map(p=>`<article style="border-bottom:1px solid var(--line);padding:10px 0"><h3>${esc(p.title)} <small>${esc(p.version)}</small></h3><p>${esc(p.body)}</p><button class="btn small light" onclick="acceptPolicy('${esc(p.id)}')">Aceitar versão</button></article>`).join("") || "<p>Nenhuma política carregada.</p>";
+  $("admOffices").textContent = state.metrics?.offices ?? state.offices.length; $("admUsers").textContent = state.metrics?.users ?? "-"; $("admClients").textContent = state.metrics?.clients ?? state.clients.length; $("admTickets").textContent = state.metrics?.openTickets ?? state.support.filter(x=>x.status!=="closed").length;
+  table("officesTable", state.offices, [{label:"Nome",value:"name"},{label:"Slug",value:"slug"},{label:"Plano",value:"plan_code"},{label:"Ativo",value:r=>badge(r.active?"ativo":"inativo")}]);
+  $("subscriptionBox").innerHTML = state.sub ? `<p><strong>Plano atual:</strong> ${esc(state.sub.plan_code || state.sub.plan_name)} — ${badge(state.sub.status)}</p>` : "<p>Sem assinatura encontrada.</p>";
+  table("plansTable", state.plans, [{label:"Código",value:"code"},{label:"Plano",value:"name"},{label:"Mensalidade",value:r=>money(r.monthly_price)},{label:"Usuários",value:"max_users"},{label:"Ações",value:r=>`<button class="btn small gold" onclick="changePlan('${esc(r.code)}')">Selecionar</button>`}]);
+  table("supportTable", state.support, [{label:"Assunto",value:"subject"},{label:"Prioridade",value:r=>badge(r.priority)},{label:"Status",value:r=>badge(r.status)},{label:"Ações",value:r=>`<div class="actions"><button class="btn small light" onclick="updateTicketStatus('${esc(r.id)}','in_progress')">Em atendimento</button><button class="btn small ok" onclick="updateTicketStatus('${esc(r.id)}','closed')">Encerrar</button></div>`}]);
+  table("backupsTable", state.backups, [{label:"ID",value:"id"},{label:"Status",value:r=>badge(r.status)},{label:"Checksum",value:"checksum"},{label:"Criado",value:"created_at"},{label:"Ações",value:r=>`<button class="btn small light" onclick="downloadBackupManifest('${esc(r.id)}')">Manifesto</button>`}]);
+  renderProductionChecklist();
+}
+function renderAlerts(){
+  const alerts = [];
+  if(!api.demoMode) alerts.push("Ambiente em produção/API: confirme banco, HTTPS, SMTP, OAuth e storage externo.");
+  if(state.clients.length===0) alerts.push("Cadastre ao menos um cliente antes de criar processos, documentos ou registros LGPD.");
+  if(state.finance.some(f=>f.type==="receita"&&f.status!=="pago")) alerts.push("Há valores em aberto no financeiro.");
+  if(state.tasks.some(t=>t.due_date && t.due_date < today() && !String(t.status).includes("conclu"))) alerts.push("Há tarefas vencidas.");
+  $("productiveAlerts").innerHTML = alerts.map(a=>`<p>⚠️ ${esc(a)}</p>`).join("") || "<p>Sem alertas produtivos.</p>";
+}
+function renderProductionChecklist(){
+  const items = [
+    ["Banco PostgreSQL real", !api.demoMode],
+    ["HTTPS/domínio configurado", !api.demoMode],
+    ["Google OAuth real", !api.demoMode],
+    ["SMTP/e-mail transacional", false],
+    ["Storage externo para backup", false],
+    ["Gateway de pagamento", false],
+    ["Termos aceitos", state.policies.length>0],
+    ["Backup antes de migration", state.backups.length>0]
+  ];
+  $("productionChecklist").innerHTML = items.map(([t,ok])=>`<p>${ok?"✅":"⬜"} ${esc(t)}</p>`).join("");
+}
+
+function requireClientSelected(id, label){ if(!$(id).value){ msg(`Selecione um cliente antes de salvar ${label}.`, "danger"); return false;} return true; }
+async function saveClient(){ const id=$("clientId").value; const data={name:$("clientName").value.trim(),document:$("clientDocument").value,email:$("clientEmail").value,phone:$("clientPhone").value,address:$("clientAddress").value,autoGenerateDocuments:$("clientAutoDocs")?.value!=="false",documentTemplates:["procuracao","contrato_honorarios","hipossuficiencia","faa"],documentData:{foro:$("clientDocForo")?.value||"Paranaguá/PR",area_juridica:$("clientDocAreaJuridica")?.value||"",processo_numero:$("clientDocProcesso")?.value||"",objeto_contrato:$("clientDocObjeto")?.value||"",modalidade_contratacao:$("clientDocModalidade")?.value||"",valor_honorarios:$("clientDocHonorarios")?.value||"",valor_entrada:$("clientDocEntrada")?.value||"",numero_parcelas:$("clientDocParcelas")?.value||"",primeiro_vencimento:$("clientDocVencimento")?.value||"",garantias_contrato:$("clientDocGarantias")?.value||""}}; if(!data.name){return msg("Nome do cliente é obrigatório.","danger")} if(id){await api.updateClient(id,data); msg("Cliente atualizado.");} else {const r=await api.createClient(data); const generated=(r && r.generatedDocuments)||[]; msg(`Cliente salvo. ${generated.length} documento(s) automático(s) gerado(s).`); if(generated.length){openModal("Documentos automáticos gerados", generated.map(d=>`<p>${esc(d.title||d.template_code)} ${badge(d.template_code||"doc")}</p>`).join(""));}} clearClientForm(); loadAll(); loadGeneratedDocuments?.();}
+function editClient(id){ const c=byId(state.clients,id); if(!c) return; $("clientId").value=c.id; $("clientName").value=c.name||""; $("clientDocument").value=c.document||""; $("clientEmail").value=c.email||""; $("clientPhone").value=c.phone||""; $("clientAddress").value=c.address||""; msg("Cliente carregado para edição."); }
+function clearClientForm(){["clientId","clientName","clientDocument","clientEmail","clientPhone","clientAddress"].forEach(id=>$(id).value=""); if($("clientAutoDocs")) $("clientAutoDocs").value="true"; if($("clientDocForo")) $("clientDocForo").value="Paranaguá/PR";}
+async function archiveClient(id){ if(!confirmAction("Arquivar este cliente?")) return; await api.archiveClient(id,"Arquivamento pela interface comercial 1.4"); msg("Cliente arquivado."); loadAll();}
+function openClientFile(id){ const c=byId(state.clients,id); const procs=state.processes.filter(p=>String(p.client_id||p.clientId)===String(id)); const docs=state.docs.filter(d=>String(d.client_id||d.clientId)===String(id)); openModal("Ficha do cliente", `<h3>${esc(c?.name)}</h3><p><strong>Processos:</strong> ${procs.length}</p><p><strong>Documentos:</strong> ${docs.length}</p>`);}
+
+async function saveProcess(){ if(!requireClientSelected("processClientId","processo")) return; const data={clientId:$("processClientId").value,client_id:$("processClientId").value,number:$("processNumber").value.trim(),area:$("processArea").value,phase:$("processPhase").value,risk:$("processRisk").value,dueDate:$("processDeadline").value,strategyNotes:$("processStrategy").value}; if(!data.number){return msg("Número do processo é obrigatório.","danger")} await api.createProcess(data); msg("Processo salvo."); loadAll();}
+function openProcessFile(id){ const p=byId(state.processes,id); openModal("Ficha do processo", `<p><strong>Número:</strong> ${esc(p?.number)}</p><p><strong>Cliente:</strong> ${esc(clientName(p?.client_id||p?.clientId))}</p><p><strong>Risco:</strong> ${esc(p?.risk)}</p>`);}
+
+async function saveTask(){ const title=$("taskTitle").value.trim(); if(!title) return msg("Título da tarefa é obrigatório.","danger"); await api.createTask({title,description:$("taskDescription").value,priority:$("taskPriority").value,status:$("taskStatus").value,dueDate:$("taskDue").value,due_date:$("taskDue").value}); msg("Tarefa salva."); loadAll();}
+async function updateTaskStatus(id,status){ await api.updateTaskStatus ? api.updateTaskStatus(id,status) : api.patch(`/tasks/${id}/status`,{status}); msg("Status da tarefa atualizado."); loadAll();}
+
+async function saveFinance(){ const amount=Number($("financeAmount").value||0); if(!amount) return msg("Informe o valor.","danger"); await api.createFinance({type:$("financeType").value,description:$("financeDescription").value,amount,dueDate:$("financeDue").value,due_date:$("financeDue").value,status:$("financeStatus").value}); msg("Lançamento salvo."); loadAll();}
+async function markFinancePaid(id){ if(!confirmAction("Baixar este lançamento como pago?")) return; await api.markFinancePaid(id); msg("Lançamento baixado como pago."); loadAll();}
+
+async function saveDocument(){ if(!requireClientSelected("docClientId","documento")) return; const data={clientId:$("docClientId").value,client_id:$("docClientId").value,processId:$("docProcessId").value||null,process_id:$("docProcessId").value||null,category:$("docCategory").value,name:$("docName").value,url:$("docUrl").value,status:$("docStatus").value}; if(!data.name||!data.category) return msg("Nome e categoria são obrigatórios.","danger"); await api.createDocument(data); msg("Documento salvo."); loadAll();}
+async function saveLgpd(){ if(!requireClientSelected("lgpdClientId","registro LGPD")) return; await api.createLgpd({clientId:$("lgpdClientId").value,client_id:$("lgpdClientId").value,legalBasis:$("lgpdBasis").value,legal_basis:$("lgpdBasis").value,dataCategory:$("lgpdCategory").value,data_category:$("lgpdCategory").value,retention:$("lgpdRetention").value,notes:$("lgpdNotes").value}); msg("Registro LGPD salvo."); loadAll();}
+function exportLgpdRecord(id){ const r=byId(state.lgpd,id); const blob=new Blob([JSON.stringify(r,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`lgpd-${id}.json`; a.click();}
+
+async function saveOffice(){ if(!confirmAction("Criar novo escritório?")) return; await api.createOffice({name:$("officeName").value,slug:$("officeSlug").value,email:$("officeEmail").value}); msg("Escritório criado."); loadAll();}
+async function changePlan(planCode){ if(!confirmAction(`Confirmar troca para o plano ${planCode}?`)) return; await api.changePlan(planCode); msg("Plano alterado."); loadAll();}
+async function createManualInvoice(){ await api.createInvoice({amount:Number($("invoiceAmount").value||0),dueDate:$("invoiceDue").value,description:$("invoiceDescription").value}); msg("Fatura manual gerada."); loadAll();}
+async function saveTicket(){ const subject=$("ticketSubject").value.trim(); if(!subject) return msg("Assunto obrigatório.","danger"); await api.createTicket({subject,message:$("ticketMessage").value,priority:$("ticketPriority").value}); msg("Chamado aberto."); loadAll();}
+async function updateTicketStatus(id,status){ await api.updateTicketStatus(id,status); msg("Status do chamado atualizado."); loadAll();}
+async function runBackup(){ await api.runBackup(); msg("Backup executado."); loadAll();}
+function preMigrationBackupLock(){ if(state.backups.length===0) return msg("Trava ativa: execute ao menos um backup antes de migration.", "danger"); msg("Backup encontrado. Migration pode seguir após conferência do ambiente.");}
+function downloadBackupManifest(id){ const b=byId(state.backups,id); const blob=new Blob([JSON.stringify(b,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`backup-manifest-${id}.json`; a.click();}
+async function acceptPolicy(id){ await api.acceptPolicy(id); msg("Aceite registrado.");}
+
+function openModal(title, body){$("modalTitle").textContent=title;$("modalBody").innerHTML=body;$("modalBackdrop").classList.add("open");}
+function closeModal(){$("modalBackdrop").classList.remove("open");}
+async function runSmokeTest(){
+  api.setDemoMode(true); $("demoToggle").checked=true; updateModeWarning();
+  const steps=[]; const push=async(name,fn)=>{try{await fn();steps.push(`OK - ${name}`)}catch(e){steps.push(`FALHA - ${name}: ${e.message}`)}};
+  await push("me",()=>api.me()); await push("clientes",()=>api.clients()); await push("criar cliente",()=>api.createClient({name:"Cliente Teste 1.4",document:"000",email:"teste@demo.com"}));
+  await loadAll();
+  const cid=state.clients[0]?.id||"c1";
+  await push("criar processo",()=>api.createProcess({clientId:cid,client_id:cid,number:"0000000-14.2026.8.16.0129",area:"Cível",risk:"baixo"}));
+  await push("criar tarefa",()=>api.createTask({title:"Teste de tarefa",priority:"normal",status:"pendente"}));
+  await push("criar financeiro",()=>api.createFinance({type:"receita",description:"Teste",amount:100,status:"aberto"}));
+  await push("criar documento",()=>api.createDocument({clientId:cid,client_id:cid,category:"Teste",name:"Documento teste",status:"recebido"}));
+  await push("criar LGPD",()=>api.createLgpd({clientId:cid,client_id:cid,legalBasis:"execução de contrato",dataCategory:"dados cadastrais"}));
+  await push("planos",()=>api.plans()); await push("suporte",()=>api.createTicket({subject:"Teste suporte",message:"ok",priority:"normal"})); await push("backup",()=>api.runBackup());
+  $("smokeResult").textContent=steps.join("\n"); loadAll();
+}
+
+
+
+
+let selectedConversationId = null;
+let lastGeneratedDocument = null;
+
+async function loadNotices(){
+  const data = await safe(()=>api.notices(), []);
+  $("noticesList").innerHTML = (data || []).map(n=>`
+    <div class="item">
+      <strong>${esc(n.title)}</strong> ${badge(n.priority||"normal")} ${n.pinned ? badge("fixado") : ""}
+      <p>${esc(n.message)}</p>
+      <small>${fmtDate(n.created_at)}</small>
+    </div>
+  `).join("");
+}
+async function createNotice(){
+  await api.createNotice({ title:$("noticeTitle").value, message:$("noticeMessage").value, priority:$("noticePriority").value, pinned:$("noticePinned").value==="true" });
+  msg("Aviso publicado no mural.");
+  await loadNotices();
+}
+async function loadConversations(){
+  const data = await safe(()=>api.conversations(), []);
+  table("conversationsTable", data, [
+    {label:"Conversa", value:"title"},
+    {label:"Tipo", value:r=>badge(r.conversation_type||"internal")},
+    {label:"Prioridade", value:r=>badge(r.priority||"normal")},
+    {label:"Não lidas", value:r=>r.unread_count||0},
+    {label:"Ações", value:r=>`<button class="btn mini" onclick="selectConversation('${r.id}')">Abrir</button>`}
+  ]);
+}
+async function createConversation(){
+  const r = await api.createConversation({ title:$("chatTitle").value, conversationType:$("chatType").value, priority:$("chatPriority").value, message:$("chatInitialMessage").value });
+  selectedConversationId = unwrap(r).id;
+  msg("Conversa criada.");
+  await loadConversations();
+  await loadConversationMessages(selectedConversationId);
+}
+async function selectConversation(id){
+  selectedConversationId = id;
+  await loadConversationMessages(id);
+}
+async function loadConversationMessages(id){
+  const data = await safe(()=>api.conversationMessages(id), []);
+  $("messagesBox").innerHTML = (data || []).map(m=>`
+    <div class="item"><strong>${esc(m.sender_name||"Usuário")}</strong><p>${esc(m.message)}</p><small>${fmtDate(m.created_at)}</small></div>
+  `).join("");
+}
+async function sendMessageToSelectedConversation(){
+  if(!selectedConversationId) return msg("Abra uma conversa primeiro.","danger");
+  await api.sendConversationMessage(selectedConversationId, $("chatNewMessage").value);
+  $("chatNewMessage").value="";
+  await loadConversationMessages(selectedConversationId);
+  await loadConversations();
+}
+async function loadVisualCalendar(){
+  const nowDate = new Date();
+  const data = await safe(()=>api.calendarMonth(nowDate.getFullYear(), nowDate.getMonth()+1), {events:[]});
+  renderCalendarGrid(nowDate.getFullYear(), nowDate.getMonth(), data.events || []);
+}
+function showTodayCalendar(){ loadVisualCalendar(); }
+function renderCalendarGrid(year, monthIndex, events){
+  const first = new Date(year, monthIndex, 1);
+  const last = new Date(year, monthIndex+1, 0);
+  const days = [];
+  for(let d=1; d<=last.getDate(); d++){
+    const date = new Date(year, monthIndex, d);
+    const iso = date.toISOString().slice(0,10);
+    const dayEvents = (events||[]).filter(e => String(e.start_at||"").slice(0,10) === iso);
+    days.push(`<div class="calendar-day"><strong>${d}</strong>${dayEvents.map(e=>`<div class="calendar-event">${esc(e.title)}<br><small>${esc(e.event_type||"evento")}</small></div>`).join("")}</div>`);
+  }
+  $("calendarGrid").innerHTML = days.join("");
+}
+function renderDocumentAutomationForm(){
+  const t = $("docautoTemplate").value;
+  const fields = {
+    todos: [["docautoEndereco","Endereço","Rua Exemplo, 100"],["docautoOutorgado","Outorgado","Advogado responsável"],["docautoPoderes","Poderes","ad judicia et extra"],["docautoEstadoCivil","Estado civil","solteiro(a)"],["docautoProfissao","Profissão",""],["docautoRenda","Renda","R$ 0,00"],["docautoRelato","Relato","Resumo do atendimento"],["docautoDocumentos","Documentos entregues","RG, CPF, comprovantes"]],
+    procuracao: [["docautoEndereco","Endereço","Rua Exemplo, 100"],["docautoOutorgado","Outorgado","Advogado responsável"],["docautoPoderes","Poderes","ad judicia et extra"]],
+    contrato_honorarios: [["docautoServico","Serviço","Atuação judicial/extrajudicial"],["docautoValor","Valor dos honorários","R$ 0,00"],["docautoPagamento","Forma de pagamento","À vista/parcelado"]],
+    hipossuficiencia: [["docautoEstadoCivil","Estado civil","solteiro(a)"],["docautoProfissao","Profissão",""],["docautoRenda","Renda","R$ 0,00"]],
+    faa: [["docautoArea","Área","Trabalhista"],["docautoRelato","Relato","Resumo do atendimento"],["docautoDocumentos","Documentos entregues","RG, CPF, comprovantes"]]
+  }[t] || [];
+  $("docautoDynamicFields").innerHTML = `<div class="form-grid">${fields.map(f=>`<div><label>${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}"></div>`).join("")}</div>`;
+}
+function collectDocautoData(){
+  return {
+    cliente_nome:$("docautoClienteNome").value,
+    cliente_cpf:$("docautoCpf").value,
+    cliente_cpf_cnpj:$("docautoCpf").value,
+    telefone:$("docautoTelefone").value,
+    email:$("docautoEmail").value,
+    foro:$("docautoForo").value,
+    area_juridica:$("docautoAreaJuridica")?.value,
+    processo_numero:$("docautoProcesso")?.value,
+    objeto_contrato:$("docautoObjeto")?.value,
+    modalidade_contratacao:$("docautoModalidade")?.value,
+    valor_honorarios:$("docautoHonorarios")?.value,
+    valor_entrada:$("docautoEntrada")?.value,
+    numero_parcelas:$("docautoParcelas")?.value,
+    primeiro_vencimento:$("docautoVencimento")?.value,
+    garantias_contrato:$("docautoGarantias")?.value,
+    cliente_endereco:$("docautoEndereco")?.value,
+    outorgado_nome:$("docautoOutorgado")?.value,
+    poderes:$("docautoPoderes")?.value,
+    servico:$("docautoServico")?.value,
+    valor_honorarios:$("docautoValor")?.value,
+    forma_pagamento:$("docautoPagamento")?.value,
+    estado_civil:$("docautoEstadoCivil")?.value,
+    profissao:$("docautoProfissao")?.value,
+    renda:$("docautoRenda")?.value,
+    area:$("docautoArea")?.value,
+    relato:$("docautoRelato")?.value,
+    documentos_entregues:$("docautoDocumentos")?.value
+  };
+}
+async function generateAutomaticDocument(){
+  const templateCode = $("docautoTemplate").value;
+  const r = await api.generateLegalDocument({ templateCode, title:`${$("docautoTemplate").selectedOptions[0].text} — ${$("docautoClienteNome").value}`, data:collectDocautoData() });
+  lastGeneratedDocument = unwrap(r);
+  const docs = lastGeneratedDocument.documents || [lastGeneratedDocument];
+  $("docautoPreview").textContent = lastGeneratedDocument.generated_text || docs.map(d=>d.generated_text || JSON.stringify(d,null,2)).join("\n\n---\n\n");
+  msg(`${docs.length} documento(s) automático(s) gerado(s) para conferência.`);
+  await loadGeneratedDocuments();
+}
+async function loadGeneratedDocuments(){
+  const data = await safe(()=>api.generatedDocuments(), []);
+  table("generatedDocsTable", data, [
+    {label:"Título", value:"title"},
+    {label:"Modelo", value:r=>badge(r.template_code)},
+    {label:"Status", value:r=>badge(r.status||"draft")},
+    {label:"Gerado em", value:r=>fmtDate(r.generated_at)}
+  ]);
+}
+function downloadGeneratedDocument(){
+  if(!lastGeneratedDocument) return msg("Gere um documento primeiro.","danger");
+  const blob = new Blob([lastGeneratedDocument.generated_text || JSON.stringify(lastGeneratedDocument,null,2)], {type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="documento-automatico-fhl.txt"; a.click();
+}
+
+async function loadPublications(){
+  const data = await safe(()=>api.publications(), []);
+  table("publicationsTable", data, [
+    {label:"Título", value:"title"},
+    {label:"Cliente", value:r=>r.client_name||"-"},
+    {label:"Processo", value:r=>r.process_number||"-"},
+    {label:"Fonte", value:"source"},
+    {label:"Prazo", value:r=>r.deadline_date||"-"},
+    {label:"Status", value:r=>badge(r.status||"new")},
+    {label:"Ações", value:r=>`<button class="btn mini" onclick="createTaskFromPublication('${r.id}')">Gerar tarefa</button>`}
+  ]);
+}
+async function createPublication(){
+  await api.createPublication({
+    title:$("pubTitle").value,
+    source:$("pubSource").value,
+    court:$("pubCourt").value,
+    publicationDate:$("pubPublicationDate").value || today(),
+    deadlineDate:$("pubDeadlineDate").value || today(),
+    deadlineType:$("pubDeadlineType").value,
+    rawText:$("pubRawText").value
+  });
+  msg("Publicação/intimação cadastrada.");
+  await loadNotices();
+loadConversations();
+loadVisualCalendar();
+renderDocumentAutomationForm();
+loadGeneratedDocuments();
+loadPublications();
+}
+async function createTaskFromPublication(id){
+  await api.createTaskFromPublication(id);
+  msg("Tarefa/prazo gerado a partir da intimação.");
+  await loadNotices();
+loadConversations();
+loadVisualCalendar();
+renderDocumentAutomationForm();
+loadGeneratedDocuments();
+loadPublications();
+  await loadTasks();
+}
+async function loadAgenda(){
+  const data = await safe(()=>api.agendaEvents(), []);
+  table("agendaTable", data, [
+    {label:"Evento", value:"title"},
+    {label:"Tipo", value:r=>badge(r.event_type||"prazo")},
+    {label:"Data", value:r=>fmtDate(r.start_at)},
+    {label:"Cliente", value:r=>r.client_name||"-"},
+    {label:"Processo", value:r=>r.process_number||"-"},
+    {label:"Status", value:r=>badge(r.status||"scheduled")},
+    {label:"Ações", value:r=>`<button class="btn mini" onclick="updateAgendaStatus('${r.id}','done')">Concluir</button>`}
+  ]);
+}
+async function createAgendaEvent(){
+  const start = $("agendaStart").value || new Date().toISOString().slice(0,16);
+  await api.createAgendaEvent({
+    title:$("agendaTitle").value,
+    eventType:$("agendaType").value,
+    startAt:start,
+    endAt:$("agendaEnd").value || null,
+    location:$("agendaLocation").value,
+    description:$("agendaDescription").value
+  });
+  msg("Evento/prazo cadastrado.");
+  await loadAgenda();
+}
+async function updateAgendaStatus(id,status){
+  await api.updateAgendaStatus(id,status);
+  msg("Status da agenda atualizado.");
+  await loadAgenda();
+}
+async function loadLeads(){
+  const data = await safe(()=>api.siteLeads(), []);
+  table("leadsTable", data, [
+    {label:"Nome", value:"name"},
+    {label:"Telefone", value:r=>r.phone||"-"},
+    {label:"E-mail", value:r=>r.email||"-"},
+    {label:"Origem", value:r=>badge(r.source||"site")},
+    {label:"Assunto", value:r=>r.subject||r.practice_area||"-"},
+    {label:"Status", value:r=>badge(r.status||"new")},
+    {label:"Ações", value:r=>`<button class="btn mini" onclick="convertLead('${r.id}')">Converter em cliente</button>`}
+  ]);
+}
+async function createLead(){
+  await api.createSiteLead({
+    name:$("leadName").value,
+    email:$("leadEmail").value,
+    phone:$("leadPhone").value,
+    source:$("leadSource").value,
+    subject:$("leadPracticeArea").value,
+    message:$("leadMessage").value,
+    practiceArea:$("leadPracticeArea").value,
+    consentLgpd:$("leadConsent").value === "true"
+  });
+  msg("Lead cadastrado.");
+  await loadLeads();
+}
+async function convertLead(id){
+  await api.convertLead(id);
+  msg("Lead convertido em cliente.");
+  await loadLeads();
+  await loadClients();
+}
+
+async function loadSaasDashboard(){
+  const [plans, me, usage] = await Promise.all([
+    safe(()=>api.saasPlans(), []),
+    safe(()=>api.saasMe(), {}),
+    safe(()=>api.saasUsage(), {})
+  ]);
+  const office = me.office || {};
+  $("saasAccountBox").innerHTML = `
+    <p><strong>Escritório:</strong> ${esc(office.name || "FHL Demonstração")}</p>
+    <p><strong>Slug:</strong> ${esc(office.public_slug || "fhl-demo")}</p>
+    <p><strong>Plano:</strong> ${badge(office.plan_code || "professional")}</p>
+    <p><strong>Status cobrança:</strong> ${badge(office.billing_status || "trial")}</p>
+    <p><strong>Onboarding:</strong> ${badge(office.onboarding_status || "in_progress")}</p>
+    <p class="muted">Trial: ${esc(String(office.trial_ends_at || "14 dias"))}</p>
+  `;
+  const u = usage.usage || {};
+  const plan = usage.plan || {};
+  const limits = plan.limits || {};
+  $("saasUsageBox").innerHTML = `
+    <p>Usuários: <strong>${u.users_count ?? 0}</strong> / ${limits.users ?? "-"}</p>
+    <p>Clientes: <strong>${u.clients_count ?? 0}</strong> / ${limits.clients ?? "-"}</p>
+    <p>Processos: <strong>${u.processes_count ?? 0}</strong> / ${limits.processes ?? "-"}</p>
+    <p>Documentos: <strong>${u.documents_count ?? 0}</strong> / ${limits.documents ?? "-"}</p>
+    <p>Storage: <strong>${u.storageGb ?? 0} GB</strong> / ${limits.storageGb ?? "-"} GB</p>
+    <p>API calls: <strong>${u.api_calls ?? 0}</strong> / ${limits.apiCalls ?? "-"}</p>
+    <p>${usage.allowed === false ? badge("limite excedido") : badge("dentro do plano")}</p>
+  `;
+  $("saasPlansBox").innerHTML = (plans || []).map(p=>`
+    <div class="item"><strong>${esc(p.name)}</strong><br>
+    <span class="muted">R$ ${Number(p.monthlyPrice||0).toFixed(2).replace(".",",")}/mês</span><br>
+    <small>${p.limits?.users || "-"} usuários · ${p.limits?.clients || "-"} clientes · ${p.limits?.storageGb || "-"} GB</small></div>
+  `).join("");
+  const checklist = [
+    ["onboarding", true, "Cadastro automático do escritório"],
+    ["tenant", true, "Isolamento multiempresa"],
+    ["plans", true, "Planos e limites"],
+    ["usage", true, "Medição de uso"],
+    ["billing", true, "Lifecycle de cobrança"],
+    ["webhooks", true, "Recebimento de webhook"],
+    ["locks", true, "Bloqueio/desbloqueio por conta"],
+    ["provisioning", true, "Jobs de provisionamento"],
+    ["gateway", false, "Gateway real pendente"],
+    ["domain", false, "Domínio/HTTPS pendente"],
+    ["smtp", false, "SMTP pendente"],
+    ["storage", false, "Storage externo pendente"]
+  ];
+  $("saasAutonomyChecklist").innerHTML = checklist.map(([k,done,label])=>`<p>${done ? "✅" : "⚠️"} <strong>${esc(label)}</strong> <span class="muted">(${esc(k)})</span></p>`).join("");
+  $("saasWebhookBox").innerHTML = `<p>${badge("endpoint pronto")}</p><p class="muted">Webhook técnico disponível em produção: /api/saas/webhooks/:provider, com validação HMAC por WEBHOOK_SECRET.</p>`;
+}
+async function simulateOnboarding(){
+  const data = await api.saasOnboarding({ officeName:"Novo Escritório Demo", publicSlug:"novo-escritorio-demo", planCode:"professional" });
+  msg("Onboarding simulado com sucesso.");
+  await loadSaasDashboard();
+}
+async function simulatePastDue(){
+  await api.saasBillingStatus({ status:"past_due", reason:"Simulação de inadimplência" });
+  msg("Status de inadimplência simulado.");
+  await loadSaasDashboard();
+}
+async function simulateUnlock(){
+  await api.saasUnlockAccount();
+  msg("Desbloqueio simulado.");
+  await loadSaasDashboard();
+}
+
+async function loadArchitectureStatus(){
+  const data = await safe(()=>api.architectureStatus(), null);
+  const d = data || {};
+  const a = d.architecture || {};
+  const ready = d.readiness || {};
+  $("architectureStatusBox").innerHTML = `
+    <div class="grid">
+      <div class="kpi"><strong>${a.responseStandard ? "OK" : "—"}</strong><span>Resposta padrão</span></div>
+      <div class="kpi"><strong>${a.globalErrorHandler ? "OK" : "—"}</strong><span>Error handler</span></div>
+      <div class="kpi"><strong>${a.tenantIsolation ? "OK" : "—"}</strong><span>Multiempresa</span></div>
+      <div class="kpi"><strong>${a.planGuards ? "OK" : "—"}</strong><span>Planos/travas</span></div>
+    </div>
+    <p><strong>Demo:</strong> ${esc(ready.demo || "-")}</p>
+    <p><strong>Implantação assistida:</strong> ${esc(ready.assistedDeployment || "-")}</p>
+    <p><strong>SaaS autônomo:</strong> ${esc(ready.autonomousSaas || "-")}</p>
+    <p class="muted">Dependências externas: ${(d.externalDependencies || []).map(esc).join(", ")}</p>
+  `;
+}
+
+function downloadState(){ const payload={}; Object.keys(localStorage).filter(k=>k.startsWith("FHL_API_DEMO")).forEach(k=>payload[k]=JSON.parse(localStorage.getItem(k))); const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="fhl-demo-state.json"; a.click(); }
+
+let lastCalculation = null;
+function numberValue(id){ return Number($(id)?.value || 0); }
+function field(id,label,type="number",value=""){ return `<div><label>${label}</label><input id="${id}" type="${type}" value="${value}"></div>`; }
+function selectIndex(id,value="IPCA"){ return `<div><label>Índice</label><select id="${id}"><option value="IPCA">IPCA</option><option value="INPC">INPC</option><option value="IPCA_E">IPCA-E</option><option value="IGP_M">IGP-M</option><option value="SELIC">SELIC</option><option value="TR">TR</option></select></div>`; }
+function interestModeSelect(id="calcInterestMode"){ return `<div><label>Regime de juros</label><select id="${id}"><option value="simple">Simples</option><option value="compound">Compostos</option></select></div>`; }
+function renderCalculatorForm(){
+  const type=$("calcType").value;
+  let html="";
+  if(type==="atualizacao"){
+    html=`<div class="form-grid">${field("calcAmount","Valor original","number","1000")}${field("calcStart","Data inicial","date","2025-01-01")}${field("calcEnd","Data final","date",today())}${selectIndex("calcIndex","IPCA")}</div>`;
+  } else if(type==="juros"){
+    html=`<div class="form-grid">${field("calcAmount","Valor original","number","1000")}${field("calcStart","Data inicial","date","2025-01-01")}${field("calcEnd","Data final","date",today())}${selectIndex("calcIndex","IPCA")}${field("calcInterest","Juros % a.m.","number","1")}${interestModeSelect()}</div>`;
+  } else if(type==="pensao"){
+    html=`<div class="form-grid">${field("calcInstallment","Valor da parcela","number","500")}${field("calcFirstDue","Primeiro vencimento","date","2025-01-10")}${field("calcEnd","Data do cálculo","date",today())}${field("calcMonths","Quantidade de parcelas","number","6")}${selectIndex("calcIndex","INPC")}${field("calcInterest","Juros % a.m.","number","1")}${interestModeSelect()}</div>`;
+  } else if(type==="horas"){
+    html=`<div class="form-grid">${field("calcSalary","Salário","number","2200")}${field("calcDivisor","Divisor","number","220")}${field("calcOvertimeHours","Horas extras","number","10")}${field("calcAdditional","Adicional %","number","50")}${field("calcNightHours","Horas noturnas","number","0")}${field("calcNightAdditional","Adicional noturno %","number","20")}${field("calcDsrWorkdays","Dias úteis","number","25")}${field("calcDsrRestdays","DSR/Feriados","number","5")}</div>`;
+  } else if(type==="rescisao"){
+    html=`<div class="form-grid">${field("calcSalary","Salário","number","2200")}${field("calcAdmission","Admissão","date","2025-01-01")}${field("calcTermination","Rescisão","date",today())}<div><label>Tipo</label><select id="calcTerminationType"><option value="sem_justa_causa">Sem justa causa</option><option value="pedido_demissao">Pedido de demissão</option><option value="justa_causa">Justa causa</option></select></div>${field("calcVacationDue","Férias vencidas","number","0")}${field("calcSalaryBalanceDays","Saldo de salário/dias","number","10")}${field("calcFgtsBalance","Saldo FGTS","number","3000")}</div>`;
+  } else if(type==="parcelas"){
+    html=`<div class="form-grid">${field("calcInstallment","Valor de cada parcela","number","500")}${field("calcFirstDue","Primeiro vencimento","date","2025-01-10")}${field("calcMonths","Quantidade de parcelas","number","6")}${field("calcEnd","Data do cálculo","date",today())}${selectIndex("calcIndex","INPC")}${field("calcInterest","Juros % a.m.","number","1")}${interestModeSelect()}</div>`;
+  } else if(type==="debito"){
+    html=`<div class="form-grid">${field("calcPrincipal","Principal","number","10000")}${field("calcStart","Data inicial","date","2025-01-01")}${field("calcEnd","Data final","date",today())}${selectIndex("calcIndex","IPCA_E")}${field("calcInterest","Juros % a.m.","number","1")}${interestModeSelect()}${field("calcCosts","Custas/despesas","number","0")}${field("calcFees","Honorários %","number","10")}</div>`;
+  }
+  $("calculatorForm").innerHTML=html;
+}
+function buildDueDates(firstDue, count){
+  const out=[]; const start=new Date(`${firstDue}T00:00:00`);
+  for(let i=0;i<Number(count||0);i++){ const d=new Date(start); d.setMonth(d.getMonth()+i); out.push(d.toISOString().slice(0,10)); }
+  return out;
+}
+async function runSelectedCalculator(){
+  const type=$("calcType").value; let response;
+  if(type==="atualizacao") response=await api.calculateMonetaryCorrection({amount:numberValue("calcAmount"),startDate:$("calcStart").value,endDate:$("calcEnd").value,indexCode:$("calcIndex").value});
+  if(type==="juros") response=await api.calculateInterestCorrection({amount:numberValue("calcAmount"),startDate:$("calcStart").value,endDate:$("calcEnd").value,indexCode:$("calcIndex").value,interestRateMonthly:numberValue("calcInterest"),interestMode:$("calcInterestMode").value});
+  if(type==="pensao") response=await api.calculatePension({installmentAmount:numberValue("calcInstallment"),firstDueDate:$("calcFirstDue").value,calculationDate:$("calcEnd").value,monthsCount:numberValue("calcMonths"),indexCode:$("calcIndex").value,interestRateMonthly:numberValue("calcInterest"),interestMode:$("calcInterestMode")?.value||"simple"});
+  if(type==="horas") response=await api.calculateOvertime({salary:numberValue("calcSalary"),divisor:numberValue("calcDivisor"),overtimeHours:numberValue("calcOvertimeHours"),additionalPercent:numberValue("calcAdditional"),nightHours:numberValue("calcNightHours"),nightAdditionalPercent:numberValue("calcNightAdditional"),dsrWorkdays:numberValue("calcDsrWorkdays"),dsrRestdays:numberValue("calcDsrRestdays")});
+  if(type==="rescisao") response=await api.calculateSeverance({salary:numberValue("calcSalary"),admissionDate:$("calcAdmission").value,terminationDate:$("calcTermination").value,terminationType:$("calcTerminationType").value,vacationDue:numberValue("calcVacationDue"),salaryBalanceDays:numberValue("calcSalaryBalanceDays"),fgtsBalance:numberValue("calcFgtsBalance")});
+  if(type==="parcelas") response=await api.calculateOverdueInstallments({installmentAmount:numberValue("calcInstallment"),dueDates:buildDueDates($("calcFirstDue").value,numberValue("calcMonths")),calculationDate:$("calcEnd").value,indexCode:$("calcIndex").value,interestRateMonthly:numberValue("calcInterest"),interestMode:$("calcInterestMode")?.value||"simple"});
+  if(type==="debito") response=await api.calculateJudicialDebt({principal:numberValue("calcPrincipal"),startDate:$("calcStart").value,endDate:$("calcEnd").value,indexCode:$("calcIndex").value,interestRateMonthly:numberValue("calcInterest"),interestMode:$("calcInterestMode")?.value||"simple",costs:numberValue("calcCosts"),feesPercent:numberValue("calcFees")});
+  lastCalculation=unwrap(response);
+  renderCalculationResult(lastCalculation);
+}
+function renderCalculationResult(calc){
+  const r=calc.result||calc; const total=r.totalWithInterest??r.total??0;
+  $("calculatorResult").innerHTML=`<div class="kpi"><strong>${money(total)}</strong><span>Total calculado</span></div><pre style="white-space:pre-wrap">${esc(JSON.stringify(r,null,2))}</pre><div class="alert">Cálculo auxiliar. Conferir índice, termo inicial, título judicial e legislação aplicável antes de usar em petição.</div>`;
+}
+async function loadIndexers(){
+  const data=await safe(()=>api.indexers());
+  table("indexersTable", data, [{label:"Código",value:"code"},{label:"Nome",value:"name"},{label:"Fonte",value:"source"},{label:"Status",value:r=>badge(r.status||"preparado")}]);
+}
+async function syncIndexers(){ const r=await api.syncIndexers(); msg(unwrap(r).message || "Sincronização preparada."); loadIndexers(); }
+function printCalculationMemory(){ if(!lastCalculation) return msg("Faça um cálculo primeiro.","danger"); const w=window.open("","_blank"); w.document.write(`<pre>${esc(JSON.stringify(lastCalculation.memory||lastCalculation,null,2))}</pre>`); w.print(); }
+function downloadCalculationMemory(){ if(!lastCalculation) return msg("Faça um cálculo primeiro.","danger"); const blob=new Blob([JSON.stringify(lastCalculation,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="memoria-calculo-fhl.json"; a.click(); }
+
+renderCalculatorForm();
+loadIndexers();
+loadAll();
+loadArchitectureStatus();
+loadSaasDashboard();
+loadNotices();
+loadConversations();
+loadVisualCalendar();
+renderDocumentAutomationForm();
+loadGeneratedDocuments();
+loadPublications();
+loadAgenda();
+loadLeads();
+if($('pubPublicationDate')) $('pubPublicationDate').value=today();
+if($('pubDeadlineDate')) $('pubDeadlineDate').value=today();
+if($('agendaStart')) $('agendaStart').value=new Date().toISOString().slice(0,16);
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FHL Profissional — Painel API</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">FHL Profissional 1.1</p>
+      <h1>Painel inicial conectado à API.</h1>
+      <p>Use este painel para testar autenticação real, clientes, processos, documentos, LGPD e logs. O MVP completo continua em <a href="/mvp">/mvp</a>.</p>
+      <div class="actions">
+        <a class="btn" href="/api/auth/google">Entrar com Google Workspace</a>
+        <a class="btn secondary" href="/mvp">Abrir MVP local</a>
+      </div>
+    </section>
+
+    <section class="hero" style="margin-top:16px">
+      <h2>Login local</h2>
+      <form id="loginForm">
+        <input id="email" placeholder="e-mail" autocomplete="username">
+        <input id="password" placeholder="senha" type="password" autocomplete="current-password">
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+      <p id="loginStatus"></p>
+    </section>
+
+    <section class="grid" id="cards">
+      <article><strong>Usuário</strong><span id="meBox">Não autenticado</span></article>
+      <article><strong>Clientes</strong><span id="clientsBox">-</span></article>
+      <article><strong>Processos</strong><span id="processesBox">-</span></article>
+      <article><strong>Documentos</strong><span id="documentsBox">-</span></article>
+    </section>
+  </main>
+
+  <script src="/api-client.js"></script>
+  <script>
+    async function refresh() {
+      try {
+        const me = await FhlApi.me();
+        document.getElementById("meBox").textContent = `${me.user.name} — ${me.user.role}`;
+        const [clients, processes, documents] = await Promise.all([
+          FhlApi.clients().catch(() => ({ data: [] })),
+          FhlApi.processes().catch(() => ({ data: [] })),
+          FhlApi.documents().catch(() => ({ data: [] }))
+        ]);
+        document.getElementById("clientsBox").textContent = `${clients.data.length} registro(s)`;
+        document.getElementById("processesBox").textContent = `${processes.data.length} registro(s)`;
+        document.getElementById("documentsBox").textContent = `${documents.data.length} registro(s)`;
+      } catch (error) {
+        document.getElementById("meBox").textContent = "Não autenticado";
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        const result = await FhlApi.login(document.getElementById("email").value, document.getElementById("password").value);
+        if (result.token) localStorage.setItem("fhl_token", result.token);
+        document.getElementById("loginStatus").textContent = "Login realizado.";
+        refresh();
+      } catch (error) {
+        document.getElementById("loginStatus").textContent = error.message;
+      }
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

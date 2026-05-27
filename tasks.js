@@ -1,0 +1,13 @@
+const express = require("express");
+const { z } = require("zod");
+const { query } = require("../db");
+const { authRequired } = require("../middleware/auth");
+const { tenantRequired } = require("../middleware/tenant");
+const { auditLog } = require("../services/audit");
+const router = express.Router();
+router.use(authRequired, tenantRequired);
+const schema=z.object({title:z.string().min(2),description:z.string().optional().nullable(),priority:z.string().optional().nullable(),dueDate:z.string().optional().nullable(),due_date:z.string().optional().nullable()});
+router.get("/",async(req,res)=>{const r=await query("select * from tasks where office_id=$1 and deleted_at is null order by due_date nulls last, created_at desc limit 500",[req.officeId]);res.json({data:r.rows});});
+router.post("/",async(req,res)=>{const b=schema.parse(req.body);const r=await query("insert into tasks (office_id,title,description,priority,due_date,created_by) values ($1,$2,$3,$4,$5,$6) returning *",[req.officeId,b.title,b.description||null,b.priority||"normal",b.dueDate||b.due_date||null,req.user.id]);await auditLog({userId:req.user.id,officeId:req.officeId,module:"Tarefas",action:"Criar tarefa",entityType:"task",entityId:r.rows[0].id,ip:req.ip});res.status(201).json({data:r.rows[0]});});
+router.patch("/:id/status",async(req,res)=>{const status=String(req.body?.status||"concluida");const r=await query("update tasks set status=$3, updated_at=now() where id=$1 and office_id=$2 returning *",[req.params.id,req.officeId,status]);if(!r.rows[0])return res.status(404).json({error:true,message:"Tarefa não encontrada."});res.json({data:r.rows[0]});});
+module.exports=router;
