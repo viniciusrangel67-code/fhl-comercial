@@ -1,0 +1,16 @@
+CORREÇÃO ATUAL — Railway não encontrou scripts/migrate.js
+
+Erro:
+Cannot find module '/app/scripts/migrate.js'
+
+O que falta no GitHub:
+scripts/migrate.js
+
+Como corrigir:
+1. Extraia este ZIP.
+2. No GitHub, vá em Adicionar arquivo > Upload files.
+3. Envie a pasta scripts inteira.
+4. Confirme que no GitHub aparece: scripts/migrate.js
+5. Volte ao Railway e clique em Redeploy latest commit.
+
+Não envie o ZIP fechado. Envie a pasta extraída chamada scripts.
